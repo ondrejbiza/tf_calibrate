@@ -47,6 +47,10 @@ with tf.Session() as sess:
         y: mnist.test.labels
     })
 
+    valid_logits = sess.run(logits, feed_dict={
+        x: mnist.test.images
+    })
+
     valid_predictions = sess.run(predictions, feed_dict={
         x: mnist.test.images
     })
@@ -58,8 +62,8 @@ with tf.Session() as sess:
 
     print("ECE before calibration: {:.2f}%".format(ece * 100))
 
-    scaled_logits, temp = calibration.temperature_scale(logits, sess, x, y, mnist.test.images, mnist.test.labels,
-                                                        learning_rate=0.01, num_steps=50)
+    temp = calibration.temperature_scale(valid_logits, sess, mnist.test.labels, learning_rate=0.01, num_steps=50)
+    scaled_logits = logits / temp
 
     scaled_predictions = tf.nn.softmax(scaled_logits)
 
