@@ -22,7 +22,7 @@ def temperature_scale(logits, session, x_pl, y_pl, valid_data, valid_labels, lea
     opt_step = opt.minimize(loss, var_list=[temperature])
 
     session.run(tf.variables_initializer([temperature]))
-    session.run(tf.variables_initializer([var for var in tf.global_variables() if 'Momentum' in var.name]))
+    session.run(tf.variables_initializer([opt.get_slot(var, name) for name in opt.get_slot_names() for var in [temperature]]))
 
     for i in range(num_steps):
 
