@@ -55,14 +55,16 @@ with tf.Session() as sess:
         x: mnist.test.images
     })
 
-    bins, average_confs, num_total = evaluation.get_bins(valid_predictions, np.argmax(mnist.test.labels, axis=1))
+    sparse_labels = np.argmax(mnist.test.labels, axis=1)
+
+    bins, average_confs, num_total = evaluation.get_bins(valid_predictions, sparse_labels)
     evaluation.plot_bins(bins, average_confs)
 
     ece = evaluation.get_ece(bins, average_confs, num_total)
 
     print("ECE before calibration: {:.2f}%".format(ece * 100))
 
-    temp = calibration.temperature_scale(valid_logits, sess, mnist.test.labels, learning_rate=0.01, num_steps=50)
+    temp = calibration.temperature_scale(valid_logits, sess, sparse_labels, learning_rate=0.01, num_steps=50)
     scaled_logits = logits / temp
 
     scaled_predictions = tf.nn.softmax(scaled_logits)
@@ -71,7 +73,7 @@ with tf.Session() as sess:
         x: mnist.test.images
     })
 
-    bins, average_confs, num_total = evaluation.get_bins(valid_predictions, np.argmax(mnist.test.labels, axis=1))
+    bins, average_confs, num_total = evaluation.get_bins(valid_predictions, sparse_labels)
     evaluation.plot_bins(bins, average_confs)
 
     ece = evaluation.get_ece(bins, average_confs, num_total)
